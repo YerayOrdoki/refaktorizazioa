@@ -201,14 +201,18 @@ public class DataAccess {
 
         List<Sale> sales = query.getResultList();
 
-        for (Sale sale : sales) {
+        filterUnsoldSales(res, sales);
+
+        return res;
+    }
+
+	private void filterUnsoldSales(List<Sale> res, List<Sale> sales) {
+		for (Sale sale : sales) {
             if (sale.getStatus() != 10) {
                 res.add(sale);
             }
         }
-
-        return res;
-    }
+	}
 
     public List<Sale> getPublishedSales(String desc, Date pubDate) {
         System.out.println(">> DataAccess: getProducts=> from= " + desc);
@@ -224,11 +228,7 @@ public class DataAccess {
 
         List<Sale> sales = query.getResultList();
 
-        for (Sale sale : sales) {
-            if (sale.getStatus() != 10) {
-                res.add(sale);
-            }
-        }
+        filterUnsoldSales(res, sales);
 
         return res;
     }
