@@ -6,13 +6,11 @@ import java.util.List;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 import dataAccess.*;
-import dataAccess.DataAccess;
 import domain.Complaint;
 import domain.Eskaera;
 import domain.EskaeraOferta;
 import domain.Review;
 import domain.Sale;
-import dataAccess.Emaitza;
 import domain.Seller;
 import exceptions.FileNotUploadedException;
 import exceptions.MustBeLaterThanTodayException;
@@ -51,7 +49,7 @@ public class BLFacadeImplementation  implements BLFacade {
    @WebMethod
 	public Sale createSale(String title, String description,int status, float price, Date pubDate, String sellerEmail, File file) throws  FileNotUploadedException, MustBeLaterThanTodayException, SaleAlreadyExistException {
 		dbManager.open();
-		Sale product=dbManager.createSale(title, description, status, price, pubDate, sellerEmail, file);		
+		Sale product=dbManager.createSale(new SaleDetails(title, description, status, price), pubDate, sellerEmail, file);		
 		dbManager.close();
 		return product;
    };

@@ -135,13 +135,12 @@ public class DataAccess {
         }
     }
 
-    public Sale createSale(String title, String description, int status, float price,
-            Date pubDate, String sellerEmail, File file)
+    public Sale createSale(SaleDetails parameterObject, Date pubDate, String sellerEmail, File file)
             throws FileNotUploadedException, MustBeLaterThanTodayException,
             SaleAlreadyExistException {
 
         System.out.println(">> DataAccess: createProduct=> title= "
-                + title + " seller=" + sellerEmail);
+                + parameterObject.getTitle() + " seller=" + sellerEmail);
 
         try {
             if (pubDate.before(UtilDate.trim(new Date()))) {
@@ -160,7 +159,7 @@ public class DataAccess {
 
             Seller seller = db.find(Seller.class, sellerEmail);
 
-            if (seller.doesSaleExist(title)) {
+            if (seller.doesSaleExist(parameterObject.getTitle())) {
                 db.getTransaction().commit();
 
                 throw new SaleAlreadyExistException(
@@ -168,7 +167,7 @@ public class DataAccess {
                                 .getString("DataAccess.SaleAlreadyExist"));
             }
 
-            Sale sale = seller.addSale(title, description, status, price, pubDate, file);
+            Sale sale = seller.addSale(parameterObject.getTitle(), parameterObject.getDescription(), parameterObject.getStatus(), parameterObject.getPrice(), pubDate, file);
 
             db.persist(sale);
             seller = db.merge(seller);
