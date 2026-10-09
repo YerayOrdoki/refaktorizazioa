@@ -601,21 +601,25 @@ public class DataAccess {
         List<Sale> basket = buyer.getBasket();
 
         for (Sale s : new ArrayList<Sale>(basket)) {
-            Sale sale = db.find(Sale.class, s.getSaleNumber());
-            Seller sellerOfProduct = sale.getSeller();
-
-            buyer.setDirua(-sale.getPrice());
-            sellerOfProduct.setDirua(sale.getPrice());
-
-            sale.setStatus(10);
-
-            buyer.addBought(sale);
+            purchaseBasketItem(buyer, s);
         }
 
         buyer.clearBasket();
 
         db.getTransaction().commit();
     }
+
+	private void purchaseBasketItem(Seller buyer, Sale s) {
+		Sale sale = db.find(Sale.class, s.getSaleNumber());
+		Seller sellerOfProduct = sale.getSeller();
+
+		buyer.setDirua(-sale.getPrice());
+		sellerOfProduct.setDirua(sale.getPrice());
+
+		sale.setStatus(10);
+
+		buyer.addBought(sale);
+	}
 
     public void addProductToBasket(String email, int saleNumber) {
         db.getTransaction().begin();
