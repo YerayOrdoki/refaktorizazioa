@@ -430,9 +430,7 @@ public class DataAccess {
     }
 
     public void buySale(Sale s, Seller current) {
-        if (s == null || current == null
-                || s.getSaleNumber() == null
-                || current.getEmail() == null) {
+        if (hasInvalidPurchaseData(s, current)) {
             return;
         }
 
@@ -442,7 +440,7 @@ public class DataAccess {
             Sale foundS = db.find(Sale.class, s.getSaleNumber());
             Seller foundCurrent = db.find(Seller.class, current.getEmail());
 
-            if (foundS == null || foundCurrent == null) {
+            if (isPurchaseEntityMissing(foundS, foundCurrent)) {
                 throw new RuntimeException("Sale or buyer not found");
             }
 
@@ -471,6 +469,16 @@ public class DataAccess {
             throw e;
         }
     }
+
+	private boolean isPurchaseEntityMissing(Sale foundS, Seller foundCurrent) {
+		return foundS == null || foundCurrent == null;
+	}
+
+	private boolean hasInvalidPurchaseData(Sale s, Seller current) {
+		return isPurchaseEntityMissing(s, current)
+                || s.getSaleNumber() == null
+                || current.getEmail() == null;
+	}
 
     public boolean updateProfile(String email, String newName, String newPassword) {
         if (email == null || newName == null || newPassword == null) {
