@@ -31,6 +31,7 @@ import exceptions.FileNotUploadedException;
 import exceptions.MustBeLaterThanTodayException;
 import exceptions.SaleAlreadyExistException;
 
+
 /**
  * It implements the data access to the objectDb database.
  */
@@ -144,7 +145,7 @@ public class DataAccess {
 
 			db.getTransaction().begin();
 
-			Seller seller = findSeller(sellerEmail);
+			Seller seller = db.find(Seller.class, sellerEmail);
 
 			if (seller.doesSaleExist(parameterObject.getTitle())) {
 				db.getTransaction().commit();
@@ -301,11 +302,11 @@ public class DataAccess {
 	}
 
 	public Emaitza isRegistered(String mail, String user, String password) {
-		if (hasNullRegistrationParams(mail, user, password)) {
+		if (mail == null || user == null || password == null) {
 			return new Emaitza(false, "", null, null);
 		}
 
-		Seller seller = findSeller(mail);
+		Seller seller = db.find(Seller.class, mail);
 		Emaitza emaitza = new Emaitza(false, "", null, null);
 
 		if (seller != null) {
@@ -330,10 +331,6 @@ public class DataAccess {
 		db.getTransaction().commit();
 
 		return emaitza;
-	}
-
-	private boolean hasNullRegistrationParams(String mail, String user, String password) {
-		return mail == null || user == null || password == null;
 	}
 
 	public Emaitza isAdminRegistered(int id, String pass) {
@@ -435,7 +432,7 @@ public class DataAccess {
 		try {
 			db.getTransaction().begin();
 
-			Seller seller = findSeller(email);
+			Seller seller = db.find(Seller.class, email);
 
 			if (seller != null) {
 				updateSellerData(newName, newPassword, seller);
@@ -465,7 +462,7 @@ public class DataAccess {
 	}
 
 	private boolean hasInvalidProfileData(String email, String newName, String newPassword) {
-		return hasNullRegistrationParams(email, newName, newPassword);
+		return email == null || newName == null || newPassword == null;
 	}
 
 	public Seller getSellerByEmail(String email) {
@@ -475,7 +472,7 @@ public class DataAccess {
 
 		db.getTransaction().begin();
 
-		Seller seller = findSeller(email);
+		Seller seller = db.find(Seller.class, email);
 
 		db.getTransaction().commit();
 
@@ -489,7 +486,7 @@ public class DataAccess {
 
 		db.getTransaction().begin();
 
-		Seller seller = findSeller(email);
+		Seller seller = db.find(Seller.class, email);
 
 		if (seller != null) {
 			seller.setDirua(amount);
@@ -545,7 +542,7 @@ public class DataAccess {
 	public void buyBasket(String email) {
 		db.getTransaction().begin();
 
-		Seller buyer = findSeller(email);
+		Seller buyer = db.find(Seller.class, email);
 		List<Sale> basket = buyer.getBasket();
 
 		for (Sale s : new ArrayList<Sale>(basket)) {
@@ -573,7 +570,7 @@ public class DataAccess {
 		db.getTransaction().begin();
 
 		try {
-			Seller buyer = findSeller(email);
+			Seller buyer = db.find(Seller.class, email);
 			Sale productToAdd = db.find(Sale.class, saleNumber);
 
 			if (buyer.getBasket() == null) {
@@ -611,7 +608,7 @@ public class DataAccess {
 	public void clearBasket(String email) {
 		db.getTransaction().begin();
 
-		Seller buyer = findSeller(email);
+		Seller buyer = db.find(Seller.class, email);
 
 		if (buyer != null && buyer.getBasket() != null) {
 			buyer.getBasket().clear();
@@ -645,7 +642,7 @@ public class DataAccess {
 	}
 
 	public List<Sale> getBasket(String email) {
-		Seller seller = findSeller(email);
+		Seller seller = db.find(Seller.class, email);
 
 		if (seller != null && seller.getBasket() != null) {
 			return new ArrayList<Sale>(seller.getBasket());
@@ -664,14 +661,17 @@ public class DataAccess {
 		try {
 			db.getTransaction().begin();
 
-			Seller seller = findSeller(sellerEmail);
+			Seller seller = db.find(Seller.class, sellerEmail);
 
 			if (seller == null) {
 				db.getTransaction().commit();
 				return null;
 			}
 
-			Eskaera eskaera = persistAndLinkEskaera(title, description, status, seller);
+			Eskaera eskaera = seller.addEskaera(title, description, status);
+
+			db.persist(eskaera);
+			db.merge(seller);
 
 			db.getTransaction().commit();
 
@@ -684,14 +684,6 @@ public class DataAccess {
 
 			return null;
 		}
-	}
-
-	private Eskaera persistAndLinkEskaera(String title, String description, String status, Seller seller) {
-		Eskaera eskaera = seller.addEskaera(title, description, status);
-
-		db.persist(eskaera);
-		db.merge(seller);
-		return eskaera;
 	}
 
 	public List<Eskaera> getEskaerak(String search) {
@@ -711,16 +703,16 @@ public class DataAccess {
 		return db.find(Eskaera.class, id);
 	}
 
-	public boolean createEskaeraOferta(Integer eskID, String selEmail, float amount, String message) {
+	public boolean createEskaeraOferta(OfertaData parameterObject) {
 
-		if (eskID == null || selEmail == null || message == null || message.trim().isEmpty()) {
+		if (parameterObject.eskID == null || parameterObject.selEmail == null || parameterObject.message == null || parameterObject.message.trim().isEmpty()) {
 			return false;
 		}
 
 		try {
 			db.getTransaction().begin();
 
-			processEskaeraOferta(eskID, selEmail, amount, message);
+			processEskaeraOferta(parameterObject.eskID, parameterObject.selEmail, parameterObject.amount, parameterObject.message);
 
 			db.getTransaction().commit();
 
@@ -738,7 +730,7 @@ public class DataAccess {
 	private boolean processEskaeraOferta(Integer eskID, String selEmail, float amount, String message) {
 
 		Eskaera eskaera = db.find(Eskaera.class, eskID);
-		Seller seller = findSeller(selEmail);
+		Seller seller = db.find(Seller.class, selEmail);
 
 		if (eskaera == null || seller == null) {
 			return false;
@@ -820,7 +812,7 @@ public class DataAccess {
 		try {
 			Sale sale = db.find(Sale.class, saleNumber);
 
-			Seller author = findSeller(authorEmail);
+			Seller author = db.find(Seller.class, authorEmail);
 
 			Seller target = sale.getSeller();
 
@@ -846,7 +838,7 @@ public class DataAccess {
 	}
 
 	public List<Sale> getBoughtsBySeller(String email) {
-		Seller seller = findSeller(email);
+		Seller seller = db.find(Seller.class, email);
 
 		if (seller == null) {
 			return new ArrayList<Sale>();
@@ -855,12 +847,8 @@ public class DataAccess {
 		return seller.getBoughts();
 	}
 
-	private Seller findSeller(String email) {
-		return db.find(Seller.class, email);
-	}
-
 	public List<Sale> getSalesBySeller(String email) {
-		Seller seller = findSeller(email);
+		Seller seller = db.find(Seller.class, email);
 
 		if (seller == null) {
 			return new ArrayList<Sale>();
@@ -872,7 +860,7 @@ public class DataAccess {
 	public List<Review> getReviewsBySeller(String email) {
 		open();
 
-		Seller seller = findSeller(email);
+		Seller seller = db.find(Seller.class, email);
 
 		if (seller == null) {
 			return new ArrayList<Review>();

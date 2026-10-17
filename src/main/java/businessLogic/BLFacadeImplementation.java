@@ -250,7 +250,7 @@ public class BLFacadeImplementation  implements BLFacade {
     @WebMethod
     public boolean createEskaeraOferta(Integer eskID, String selEmail, float amount, String message) {
     	dbManager.open();
-    	boolean a = dbManager.createEskaeraOferta(eskID, selEmail, amount, message);
+    	boolean a = dbManager.createEskaeraOferta(new OfertaData(eskID, selEmail, amount, message));
     	dbManager.close();
     	return a;
     }
