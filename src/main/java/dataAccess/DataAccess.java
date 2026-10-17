@@ -302,16 +302,9 @@ public class DataAccess {
             return new Emaitza(false, "", null, null);
         }
 
-        TypedQuery<Seller> query = db.createQuery(
-                "SELECT s FROM Seller s WHERE s.name=?1 AND s.pass=?2",
-                Seller.class);
+        Seller seller = findSellerByCredentials(log, pass);
 
-        query.setParameter(1, log);
-        query.setParameter(2, pass);
-
-        if (!query.getResultList().isEmpty()) {
-            Seller seller = query.getResultList().get(0);
-
+        if (seller != null) {
             return new Emaitza(
                     true,
                     seller.getEmail(),
@@ -414,19 +407,15 @@ public class DataAccess {
             return "";
         }
 
-        TypedQuery<Seller> query = db.createQuery(
-                "SELECT s FROM Seller s WHERE s.name=?1 AND s.pass=?2",
-                Seller.class);
+        Seller seller = findSellerByCredentials(name, pass);
 
-        query.setParameter(1, name);
-        query.setParameter(2, pass);
-
-        if (!query.getResultList().isEmpty()) {
-            return query.getResultList().get(0).getEmail();
+        if (seller != null) {
+            return seller.getEmail();
         }
 
         return "";
     }
+    
 
     public void buySale(Sale s, Seller current) {
         if (hasInvalidPurchaseData(s, current)) {
@@ -1003,5 +992,22 @@ public class DataAccess {
         }
 
         return sale.getSeller().getEmail();
+    }
+    
+    
+    private Seller findSellerByCredentials(String name, String pass) {
+        TypedQuery<Seller> query = db.createQuery(
+                "SELECT s FROM Seller s WHERE s.name=?1 AND s.pass=?2",
+                Seller.class);
+
+        query.setParameter(1, name);
+        query.setParameter(2, pass);
+
+        List<Seller> results = query.getResultList();
+        if (!results.isEmpty()) {
+            return results.get(0);
+        }
+
+        return null;
     }
 }
