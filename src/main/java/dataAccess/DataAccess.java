@@ -30,7 +30,7 @@ import domain.Seller;
 import exceptions.FileNotUploadedException;
 import exceptions.MustBeLaterThanTodayException;
 import exceptions.SaleAlreadyExistException;
-
+ 
 /**
  * It implements the data access to the objectDb database.
  */
@@ -805,26 +805,7 @@ public class DataAccess {
         try {
             db.getTransaction().begin();
 
-            Eskaera eskaera = db.find(
-                    Eskaera.class,
-                    eskID);
-
-            Seller seller = db.find(
-                    Seller.class,
-                    selEmail);
-
-            if (eskaera == null || seller == null) {
-                db.getTransaction().rollback();
-                return false;
-            }
-
-            EskaeraOferta oferta = eskaera.addOferta(
-                    amount,
-                    message,
-                    seller);
-
-            db.persist(oferta);
-            db.merge(eskaera);
+            processEskaeraOferta(eskID, selEmail, amount, message);
 
             db.getTransaction().commit();
 
@@ -837,6 +818,22 @@ public class DataAccess {
 
             return false;
         }
+    }
+
+    private boolean processEskaeraOferta(Integer eskID, String selEmail, float amount, String message) {
+
+        Eskaera eskaera = db.find( Eskaera.class, eskID);
+        Seller seller = db.find( Seller.class, selEmail);
+
+        if (eskaera == null || seller == null) {
+            return false;
+        }
+
+        EskaeraOferta oferta = eskaera.addOferta(amount, message, seller);
+        db.persist(oferta);
+        db.merge(eskaera);
+
+        return true;
     }
 
     public List<Eskaera> getMyEskaerak(Seller seller) {
