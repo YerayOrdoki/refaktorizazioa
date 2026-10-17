@@ -480,20 +480,17 @@ public class DataAccess {
 	}
 
     public boolean updateProfile(String email, String newName, String newPassword) {
-        if (email == null || newName == null || newPassword == null) {
+    	if (hasInvalidProfileData(email, newName, newPassword)) {
             return false;
         }
-
+    	
         try {
             db.getTransaction().begin();
 
             Seller seller = db.find(Seller.class, email);
 
             if (seller != null) {
-                seller.setName(newName);
-                seller.setPass(newPassword);
-
-                db.merge(seller);
+                updateSellerData(newName, newPassword, seller);
                 db.getTransaction().commit();
 
                 return true;
@@ -511,6 +508,17 @@ public class DataAccess {
             return false;
         }
     }
+
+	private void updateSellerData(String newName, String newPassword, Seller seller) {
+		seller.setName(newName);
+		seller.setPass(newPassword);
+
+		db.merge(seller);
+	}
+
+	private boolean hasInvalidProfileData(String email, String newName, String newPassword) {
+		return email == null || newName == null || newPassword == null;
+	}
 
     public Seller getSellerByEmail(String email) {
         if (email == null) {
