@@ -301,7 +301,7 @@ public class DataAccess {
 	}
 
 	public Emaitza isRegistered(String mail, String user, String password) {
-		if (mail == null || user == null || password == null) {
+		if (hasNullRegistrationParams(mail, user, password)) {
 			return new Emaitza(false, "", null, null);
 		}
 
@@ -330,6 +330,10 @@ public class DataAccess {
 		db.getTransaction().commit();
 
 		return emaitza;
+	}
+
+	private boolean hasNullRegistrationParams(String mail, String user, String password) {
+		return mail == null || user == null || password == null;
 	}
 
 	public Emaitza isAdminRegistered(int id, String pass) {
@@ -461,7 +465,7 @@ public class DataAccess {
 	}
 
 	private boolean hasInvalidProfileData(String email, String newName, String newPassword) {
-		return email == null || newName == null || newPassword == null;
+		return hasNullRegistrationParams(email, newName, newPassword);
 	}
 
 	public Seller getSellerByEmail(String email) {
