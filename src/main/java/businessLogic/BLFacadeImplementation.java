@@ -282,7 +282,8 @@ public class BLFacadeImplementation  implements BLFacade {
     @WebMethod
     public void createReview(String authorEmail, int saleNumber, String comment, int stars) {
         dbManager.open();
-        dbManager.createReview(authorEmail, saleNumber, comment, stars);
+        ReviewDetails reviewDetails = new ReviewDetails(comment, stars);
+        dbManager.createReview(authorEmail, saleNumber, reviewDetails);
         dbManager.close();
     }
     @WebMethod

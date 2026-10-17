@@ -901,13 +901,9 @@ public class DataAccess {
         }
     }
 
-    public void createReview(
-            String authorEmail,
-            int saleNumber,
-            String comment,
-            int stars) {
+    public void createReview(String authorEmail, int saleNumber, ReviewDetails reviewDetails) {
 
-        if (stars < 1 || stars > 5) {
+        if (reviewDetails.getStars() < 1 || reviewDetails.getStars() > 5) {
             throw new RuntimeException(
                     "Las estrellas deben estar entre 1 y 5.");
         }
@@ -934,8 +930,8 @@ public class DataAccess {
                     author,
                     target,
                     sale,
-                    comment,
-                    stars);
+                    reviewDetails.getComment(),
+                    reviewDetails.getStars());
 
             target.addReview(newReview);
 
@@ -951,7 +947,7 @@ public class DataAccess {
             throw e;
         }
     }
-
+    
     public List<Sale> getBoughtsBySeller(String email) {
         Seller seller = db.find(Seller.class, email);
 
