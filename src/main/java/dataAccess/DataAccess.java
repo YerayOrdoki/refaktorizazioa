@@ -30,473 +30,428 @@ import domain.Seller;
 import exceptions.FileNotUploadedException;
 import exceptions.MustBeLaterThanTodayException;
 import exceptions.SaleAlreadyExistException;
- 
+
 /**
  * It implements the data access to the objectDb database.
  */
 public class DataAccess {
-	//komentario bat, eta beste bat
+	// komentario bat, eta beste bat
 
-    private EntityManager db;
-    private EntityManagerFactory emf;
+	private EntityManager db;
+	private EntityManagerFactory emf;
 
-    private static final int BASE_SIZE = 160;
-    private static final String BASE_PATH = "src/main/resources/images/";
+	private static final int BASE_SIZE = 160;
+	private static final String BASE_PATH = "src/main/resources/images/";
 
-    private ConfigXML c = ConfigXML.getInstance();
-    private static final String ETIQUETAS = "Etiquetas";
-    public DataAccess() {
-    	if (c.isDatabaseInitialized()) {
-            String fileName = c.getDbFilename();
-            File fileToDelete = new File(fileName);
-            try {
-                Files.delete(fileToDelete.toPath());
+	private ConfigXML c = ConfigXML.getInstance();
+	private static final String ETIQUETAS = "Etiquetas";
 
-                File fileToDeleteTemp = new File(fileName + "$");
-                if (fileToDeleteTemp.exists()) {
-                    Files.delete(fileToDeleteTemp.toPath());
-                }
-                System.out.println("Database file deleted");
-            } catch (IOException e) {
-                System.out.println("Database file could not be deleted: "
-                        + fileToDelete.getPath() + " (" + e.getMessage() + ")");
-            }
-        }
+	public DataAccess() {
+		if (c.isDatabaseInitialized()) {
+			String fileName = c.getDbFilename();
+			File fileToDelete = new File(fileName);
+			try {
+				Files.delete(fileToDelete.toPath());
 
-        open();
+				File fileToDeleteTemp = new File(fileName + "$");
+				if (fileToDeleteTemp.exists()) {
+					Files.delete(fileToDeleteTemp.toPath());
+				}
+				System.out.println("Database file deleted");
+			} catch (IOException e) {
+				System.out.println(
+						"Database file could not be deleted: " + fileToDelete.getPath() + " (" + e.getMessage() + ")");
+			}
+		}
 
-        if (c.isDatabaseInitialized()) {
-            initializeDB();
-        }
+		open();
 
-        System.out.println("DataAccess created => isDatabaseLocal: "
-                + c.isDatabaseLocal()
-                + " isDatabaseInitialized: "
-                + c.isDatabaseInitialized());
+		if (c.isDatabaseInitialized()) {
+			initializeDB();
+		}
 
-        close();
-    }
+		System.out.println("DataAccess created => isDatabaseLocal: " + c.isDatabaseLocal() + " isDatabaseInitialized: "
+				+ c.isDatabaseInitialized());
 
-    public DataAccess(EntityManager db) {
-        this.db = db;
-    }
+		close();
+	}
 
-    /**
-     * This method initializes the database with some products and sellers.
-     */
-    public void initializeDB() {
-        db.getTransaction().begin();
+	public DataAccess(EntityManager db) {
+		this.db = db;
+	}
 
-        try {
-            String initialDataPassword = c.getInitialDataPassword();
+	/**
+	 * This method initializes the database with some products and sellers.
+	 */
+	public void initializeDB() {
+		db.getTransaction().begin();
 
-            Seller seller1 = new Seller(
-                    "seller1@gmail.com",
-                    "Aitor Fernandez",
-                    initialDataPassword);
+		try {
+			String initialDataPassword = c.getInitialDataPassword();
 
-            Seller seller2 = new Seller(
-                    "seller22@gmail.com",
-                    "Ane Gaztañaga",
-                    initialDataPassword);
+			Seller seller1 = new Seller("seller1@gmail.com", "Aitor Fernandez", initialDataPassword);
 
-            Seller seller3 = new Seller(
-                    "seller3@gmail.com",
-                    "Test Seller",
-                    initialDataPassword);
+			Seller seller2 = new Seller("seller22@gmail.com", "Ane Gaztañaga", initialDataPassword);
 
-            Date today = UtilDate.trim(new Date());
+			Seller seller3 = new Seller("seller3@gmail.com", "Test Seller", initialDataPassword);
 
-            seller1.addSale("futbol baloia", "oso polita, gutxi erabilita", 0, 2, today, null);
-            seller1.addSale("salomon mendiko botak", "44 zenbakia, 3 ateraldi", 20, 2, today, null);
-            seller1.addSale("samsung 42\" telebista", "berria, erabili gabe", 175, 1, today, null);
+			Date today = UtilDate.trim(new Date());
 
-            seller2.addSale("imac 27", "7 urte, dena ondo dabil", 1, 200, today, null);
-            seller2.addSale("iphone 17", "oso gutxi erabilita", 2, 400, today, null);
-            seller2.addSale("orbea mendiko bizikleta", "29\" 10 urte, mantenua behar du", 3, 225, today, null);
-            seller2.addSale("polar kilor erlojua", "Vantage M, ondo dago", 3, 30, today, null);
+			seller1.addSale("futbol baloia", "oso polita, gutxi erabilita", 0, 2, today, null);
+			seller1.addSale("salomon mendiko botak", "44 zenbakia, 3 ateraldi", 20, 2, today, null);
+			seller1.addSale("samsung 42\" telebista", "berria, erabili gabe", 175, 1, today, null);
 
-            seller3.addSale("sukaldeko mahaia", "1.8*0.8, 4 aulkiekin. Prezio finkoa", 3, 45, today, null);
+			seller2.addSale("imac 27", "7 urte, dena ondo dabil", 1, 200, today, null);
+			seller2.addSale("iphone 17", "oso gutxi erabilita", 2, 400, today, null);
+			seller2.addSale("orbea mendiko bizikleta", "29\" 10 urte, mantenua behar du", 3, 225, today, null);
+			seller2.addSale("polar kilor erlojua", "Vantage M, ondo dago", 3, 30, today, null);
 
-            db.persist(seller1);
-            db.persist(seller2);
-            db.persist(seller3);
+			seller3.addSale("sukaldeko mahaia", "1.8*0.8, 4 aulkiekin. Prezio finkoa", 3, 45, today, null);
 
-            db.getTransaction().commit();
+			db.persist(seller1);
+			db.persist(seller2);
+			db.persist(seller3);
 
-            System.out.println("Db initialized");
+			db.getTransaction().commit();
 
-        } catch (Exception e) {
-            if (db.getTransaction().isActive()) {
-                db.getTransaction().rollback();
-            }
+			System.out.println("Db initialized");
 
-            System.err.println("Error while initializing database: " + e.getMessage());
-        }
-    }
+		} catch (Exception e) {
+			if (db.getTransaction().isActive()) {
+				db.getTransaction().rollback();
+			}
 
-    public Sale createSale(SaleDetails parameterObject, Date pubDate, String sellerEmail, File file)
-            throws FileNotUploadedException, MustBeLaterThanTodayException,
-            SaleAlreadyExistException {
+			System.err.println("Error while initializing database: " + e.getMessage());
+		}
+	}
 
-        System.out.println(">> DataAccess: createProduct=> title= "
-                + parameterObject.getTitle() + " seller=" + sellerEmail);
+	public Sale createSale(SaleDetails parameterObject, Date pubDate, String sellerEmail, File file)
+			throws FileNotUploadedException, MustBeLaterThanTodayException, SaleAlreadyExistException {
 
-        try {
-            if (pubDate.before(UtilDate.trim(new Date()))) {
-                throw new MustBeLaterThanTodayException(
-                        ResourceBundle.getBundle(ETIQUETAS)
-                                .getString("DataAccess.ErrorSaleMustBeLaterThanToday"));
-            }
+		System.out.println(
+				">> DataAccess: createProduct=> title= " + parameterObject.getTitle() + " seller=" + sellerEmail);
 
-            if (file == null) {
-                throw new FileNotUploadedException(
-                        ResourceBundle.getBundle(ETIQUETAS)
-                                .getString("DataAccess.ErrorFileNotUploadedException"));
-            }
+		try {
+			if (pubDate.before(UtilDate.trim(new Date()))) {
+				throw new MustBeLaterThanTodayException(
+						ResourceBundle.getBundle(ETIQUETAS).getString("DataAccess.ErrorSaleMustBeLaterThanToday"));
+			}
 
-            db.getTransaction().begin();
+			if (file == null) {
+				throw new FileNotUploadedException(
+						ResourceBundle.getBundle(ETIQUETAS).getString("DataAccess.ErrorFileNotUploadedException"));
+			}
 
-            Seller seller = db.find(Seller.class, sellerEmail);
+			db.getTransaction().begin();
 
-            if (seller.doesSaleExist(parameterObject.getTitle())) {
-                db.getTransaction().commit();
+			Seller seller = db.find(Seller.class, sellerEmail);
 
-                throw new SaleAlreadyExistException(
-                        ResourceBundle.getBundle(ETIQUETAS)
-                                .getString("DataAccess.SaleAlreadyExist"));
-            }
+			if (seller.doesSaleExist(parameterObject.getTitle())) {
+				db.getTransaction().commit();
 
-            Sale sale = seller.addSale(parameterObject.getTitle(), parameterObject.getDescription(), parameterObject.getStatus(), parameterObject.getPrice(), pubDate, file);
+				throw new SaleAlreadyExistException(
+						ResourceBundle.getBundle(ETIQUETAS).getString("DataAccess.SaleAlreadyExist"));
+			}
 
-            db.persist(sale);
-            seller = db.merge(seller);
+			Sale sale = seller.addSale(parameterObject.getTitle(), parameterObject.getDescription(),
+					parameterObject.getStatus(), parameterObject.getPrice(), pubDate, file);
 
-            db.getTransaction().commit();
+			db.persist(sale);
+			seller = db.merge(seller);
 
-            System.out.println("sale stored " + sale + " " + seller);
+			db.getTransaction().commit();
 
-            return sale;
+			System.out.println("sale stored " + sale + " " + seller);
 
-        } catch (NullPointerException e) {
-            if (db.getTransaction().isActive()) {
-                db.getTransaction().rollback();
-            }
+			return sale;
 
-            return null;
-        }
-    }
+		} catch (NullPointerException e) {
+			if (db.getTransaction().isActive()) {
+				db.getTransaction().rollback();
+			}
 
-    public List<Sale> getSales(String desc) {
-        System.out.println(">> DataAccess: getProducts=> from= " + desc);
+			return null;
+		}
+	}
 
-        List<Sale> res = new ArrayList<Sale>();
+	public List<Sale> getSales(String desc) {
+		System.out.println(">> DataAccess: getProducts=> from= " + desc);
 
-        TypedQuery<Sale> query = db.createQuery(
-                "SELECT s FROM Sale s WHERE s.title LIKE ?1",
-                Sale.class);
+		List<Sale> res = new ArrayList<Sale>();
 
-        query.setParameter(1, "%" + desc + "%");
+		TypedQuery<Sale> query = db.createQuery("SELECT s FROM Sale s WHERE s.title LIKE ?1", Sale.class);
 
-        List<Sale> sales = query.getResultList();
+		query.setParameter(1, "%" + desc + "%");
 
-        filterUnsoldSales(res, sales);
+		List<Sale> sales = query.getResultList();
 
-        return res;
-    }
+		filterUnsoldSales(res, sales);
+
+		return res;
+	}
 
 	private void filterUnsoldSales(List<Sale> res, List<Sale> sales) {
 		for (Sale sale : sales) {
-            if (sale.getStatus() != 10) {
-                res.add(sale);
-            }
-        }
+			if (sale.getStatus() != 10) {
+				res.add(sale);
+			}
+		}
 	}
 
-    public List<Sale> getPublishedSales(String desc, Date pubDate) {
-        System.out.println(">> DataAccess: getProducts=> from= " + desc);
+	public List<Sale> getPublishedSales(String desc, Date pubDate) {
+		System.out.println(">> DataAccess: getProducts=> from= " + desc);
 
-        List<Sale> res = new ArrayList<Sale>();
+		List<Sale> res = new ArrayList<Sale>();
 
-        TypedQuery<Sale> query = db.createQuery(
-                "SELECT s FROM Sale s WHERE s.title LIKE ?1 AND s.pubDate <= ?2",
-                Sale.class);
+		TypedQuery<Sale> query = db.createQuery("SELECT s FROM Sale s WHERE s.title LIKE ?1 AND s.pubDate <= ?2",
+				Sale.class);
 
-        query.setParameter(1, "%" + desc + "%");
-        query.setParameter(2, pubDate);
+		query.setParameter(1, "%" + desc + "%");
+		query.setParameter(2, pubDate);
 
-        List<Sale> sales = query.getResultList();
+		List<Sale> sales = query.getResultList();
 
-        filterUnsoldSales(res, sales);
+		filterUnsoldSales(res, sales);
 
-        return res;
-    }
+		return res;
+	}
 
-    public void open() {
-        String fileName = c.getDbFilename();
-
-        if (c.isDatabaseLocal()) {
-            emf = Persistence.createEntityManagerFactory("objectdb:" + fileName);
-            db = emf.createEntityManager();
-        } else {
-            Map<String, String> properties = new HashMap<String, String>();
+	public void open() {
+		String fileName = c.getDbFilename();
 
-            properties.put("javax.persistence.jdbc.user", c.getUser());
-            properties.put("javax.persistence.jdbc.password", c.getPassword());
+		if (c.isDatabaseLocal()) {
+			emf = Persistence.createEntityManagerFactory("objectdb:" + fileName);
+			db = emf.createEntityManager();
+		} else {
+			Map<String, String> properties = new HashMap<String, String>();
 
-            emf = Persistence.createEntityManagerFactory(
-                    "objectdb://"
-                            + c.getDatabaseNode()
-                            + ":"
-                            + c.getDatabasePort()
-                            + "/"
-                            + fileName,
-                    properties);
+			properties.put("javax.persistence.jdbc.user", c.getUser());
+			properties.put("javax.persistence.jdbc.password", c.getPassword());
 
-            db = emf.createEntityManager();
-        }
+			emf = Persistence.createEntityManagerFactory(
+					"objectdb://" + c.getDatabaseNode() + ":" + c.getDatabasePort() + "/" + fileName, properties);
 
-        System.out.println("DataAccess opened => isDatabaseLocal: "
-                + c.isDatabaseLocal());
-    }
+			db = emf.createEntityManager();
+		}
 
-    public BufferedImage getFile(String fileName) {
-        File file = new File(BASE_PATH + fileName);
-        BufferedImage targetImg = null;
+		System.out.println("DataAccess opened => isDatabaseLocal: " + c.isDatabaseLocal());
+	}
 
-        try {
-            targetImg = rescale(ImageIO.read(file));
-        } catch (IOException ex) {
-            System.err.println("Error reading image file: " + ex.getMessage());
-        }
+	public BufferedImage getFile(String fileName) {
+		File file = new File(BASE_PATH + fileName);
+		BufferedImage targetImg = null;
 
-        return targetImg;
-    }
+		try {
+			targetImg = rescale(ImageIO.read(file));
+		} catch (IOException ex) {
+			System.err.println("Error reading image file: " + ex.getMessage());
+		}
 
-    public List<Seller> getUser() {
-        TypedQuery<Seller> query = db.createQuery(
-                "SELECT s FROM Seller s",
-                Seller.class);
+		return targetImg;
+	}
 
-        return query.getResultList();
-    }
+	public List<Seller> getUser() {
+		TypedQuery<Seller> query = db.createQuery("SELECT s FROM Seller s", Seller.class);
 
-    public BufferedImage rescale(BufferedImage originalImage) {
-        System.out.println("rescale " + originalImage);
+		return query.getResultList();
+	}
 
-        BufferedImage resizedImage = new BufferedImage(
-                BASE_SIZE,
-                BASE_SIZE,
-                BufferedImage.TYPE_INT_RGB);
+	public BufferedImage rescale(BufferedImage originalImage) {
+		System.out.println("rescale " + originalImage);
 
-        Graphics2D g = resizedImage.createGraphics();
+		BufferedImage resizedImage = new BufferedImage(BASE_SIZE, BASE_SIZE, BufferedImage.TYPE_INT_RGB);
 
-        g.drawImage(originalImage, 0, 0, BASE_SIZE, BASE_SIZE, null);
-        g.dispose();
+		Graphics2D g = resizedImage.createGraphics();
 
-        return resizedImage;
-    }
+		g.drawImage(originalImage, 0, 0, BASE_SIZE, BASE_SIZE, null);
+		g.dispose();
 
-    public Emaitza isLogged(String log, String pass) {
-        if (log == null || pass == null) {
-            return new Emaitza(false, "", null, null);
-        }
+		return resizedImage;
+	}
 
-        Seller seller = findSellerByCredentials(log, pass);
+	public Emaitza isLogged(String log, String pass) {
+		if (log == null || pass == null) {
+			return new Emaitza(false, "", null, null);
+		}
 
-        if (seller != null) {
-            return new Emaitza(
-                    true,
-                    seller.getEmail(),
-                    seller,
-                    null);
-        }
+		Seller seller = findSellerByCredentials(log, pass);
 
-        return new Emaitza(false, "", null, null);
-    }
+		if (seller != null) {
+			return new Emaitza(true, seller.getEmail(), seller, null);
+		}
 
-    public Emaitza isAdminLogged(int id, String pass) {
-        if (pass == null) {
-            return new Emaitza(false, "", null, null);
-        }
+		return new Emaitza(false, "", null, null);
+	}
 
-        TypedQuery<Admin> query = db.createQuery(
-                "SELECT a FROM Admin a WHERE a.ID=?1 AND a.pass=?2",
-                Admin.class);
+	public Emaitza isAdminLogged(int id, String pass) {
+		if (pass == null) {
+			return new Emaitza(false, "", null, null);
+		}
 
-        query.setParameter(1, id);
-        query.setParameter(2, pass);
+		TypedQuery<Admin> query = db.createQuery("SELECT a FROM Admin a WHERE a.ID=?1 AND a.pass=?2", Admin.class);
 
-        if (!query.getResultList().isEmpty()) {
-            return new Emaitza(
-                    true,
-                    "",
-                    null,
-                    query.getResultList().get(0));
-        }
+		query.setParameter(1, id);
+		query.setParameter(2, pass);
 
-        return new Emaitza(false, "", null, null);
-    }
+		if (!query.getResultList().isEmpty()) {
+			return new Emaitza(true, "", null, query.getResultList().get(0));
+		}
 
-    public Emaitza isRegistered(String mail, String user, String password) {
-        if (mail == null || user == null || password == null) {
-            return new Emaitza(false, "", null, null);
-        }
+		return new Emaitza(false, "", null, null);
+	}
 
-        Seller seller = db.find(Seller.class, mail);
-        Emaitza emaitza = new Emaitza(false, "", null, null);
+	public Emaitza isRegistered(String mail, String user, String password) {
+		if (mail == null || user == null || password == null) {
+			return new Emaitza(false, "", null, null);
+		}
 
-        if (seller != null) {
-            return emaitza;
-        }
+		Seller seller = db.find(Seller.class, mail);
+		Emaitza emaitza = new Emaitza(false, "", null, null);
 
-        TypedQuery<Seller> query = db.createQuery(
-                "SELECT s FROM Seller s WHERE s.name=?1",
-                Seller.class);
+		if (seller != null) {
+			return emaitza;
+		}
 
-        query.setParameter(1, user);
+		TypedQuery<Seller> query = db.createQuery("SELECT s FROM Seller s WHERE s.name=?1", Seller.class);
 
-        if (!query.getResultList().isEmpty()) {
-            return emaitza;
-        }
+		query.setParameter(1, user);
 
-        db.getTransaction().begin();
+		if (!query.getResultList().isEmpty()) {
+			return emaitza;
+		}
 
-        Seller sellerToPersist = new Seller(mail, user, password);
+		db.getTransaction().begin();
 
-        emaitza = new Emaitza(true, mail, sellerToPersist, null);
+		Seller sellerToPersist = new Seller(mail, user, password);
 
-        db.persist(sellerToPersist);
-        db.getTransaction().commit();
+		emaitza = new Emaitza(true, mail, sellerToPersist, null);
 
-        return emaitza;
-    }
+		db.persist(sellerToPersist);
+		db.getTransaction().commit();
 
-    public Emaitza isAdminRegistered(int id, String pass) {
-        Admin admin = db.find(Admin.class, id);
-        Emaitza emaitza = new Emaitza(false, "", null, null);
+		return emaitza;
+	}
 
-        if (admin != null) {
-            return emaitza;
-        }
+	public Emaitza isAdminRegistered(int id, String pass) {
+		Admin admin = db.find(Admin.class, id);
+		Emaitza emaitza = new Emaitza(false, "", null, null);
 
-        TypedQuery<Admin> query = db.createQuery(
-                "SELECT a FROM Admin a WHERE a.ID=?1",
-                Admin.class);
+		if (admin != null) {
+			return emaitza;
+		}
 
-        query.setParameter(1, id);
+		TypedQuery<Admin> query = db.createQuery("SELECT a FROM Admin a WHERE a.ID=?1", Admin.class);
 
-        if (!query.getResultList().isEmpty()) {
-            return emaitza;
-        }
+		query.setParameter(1, id);
 
-        db.getTransaction().begin();
+		if (!query.getResultList().isEmpty()) {
+			return emaitza;
+		}
 
-        Admin adminToPersist = new Admin(id, pass);
+		db.getTransaction().begin();
 
-        emaitza = new Emaitza(true, "", null, adminToPersist);
+		Admin adminToPersist = new Admin(id, pass);
 
-        db.persist(adminToPersist);
-        db.getTransaction().commit();
+		emaitza = new Emaitza(true, "", null, adminToPersist);
 
-        return emaitza;
-    }
+		db.persist(adminToPersist);
+		db.getTransaction().commit();
 
-    public String getEmail(String name, String pass) {
-        if (name == null || pass == null) {
-            return "";
-        }
+		return emaitza;
+	}
 
-        Seller seller = findSellerByCredentials(name, pass);
+	public String getEmail(String name, String pass) {
+		if (name == null || pass == null) {
+			return "";
+		}
 
-        if (seller != null) {
-            return seller.getEmail();
-        }
+		Seller seller = findSellerByCredentials(name, pass);
 
-        return "";
-    }
-    
+		if (seller != null) {
+			return seller.getEmail();
+		}
 
-    public void buySale(Sale s, Seller current) {
-        if (hasInvalidPurchaseData(s, current)) {
-            return;
-        }
+		return "";
+	}
 
-        try {
-            db.getTransaction().begin();
+	public void buySale(Sale s, Seller current) {
+		if (hasInvalidPurchaseData(s, current)) {
+			return;
+		}
 
-            Sale foundS = db.find(Sale.class, s.getSaleNumber());
-            Seller foundCurrent = db.find(Seller.class, current.getEmail());
+		try {
+			db.getTransaction().begin();
 
-            if (isPurchaseEntityMissing(foundS, foundCurrent)) {
-                throw new RuntimeException("Sale or buyer not found");
-            }
+			Sale foundS = db.find(Sale.class, s.getSaleNumber());
+			Seller foundCurrent = db.find(Seller.class, current.getEmail());
 
-            foundS.setStatus(10);
+			if (isPurchaseEntityMissing(foundS, foundCurrent)) {
+				throw new RuntimeException("Sale or buyer not found");
+			}
 
-            float price = s.getPrice();
+			foundS.setStatus(10);
 
-            foundCurrent.setDirua(-price);
-            foundCurrent.addBought(foundS);
+			float price = s.getPrice();
 
-            Seller seller = foundS.getSeller();
+			foundCurrent.setDirua(-price);
+			foundCurrent.addBought(foundS);
 
-            seller.setDirua(price);
+			Seller seller = foundS.getSeller();
 
-            foundS=db.merge(foundS);
-            foundCurrent=db.merge(foundCurrent);
-            seller=db.merge(seller);
+			seller.setDirua(price);
 
-            db.getTransaction().commit();
+			foundS = db.merge(foundS);
+			foundCurrent = db.merge(foundCurrent);
+			seller = db.merge(seller);
 
-        } catch (Exception e) {
-            if (db.getTransaction().isActive()) {
-                db.getTransaction().rollback();
-            }
+			db.getTransaction().commit();
 
-            throw e;
-        }
-    }
+		} catch (Exception e) {
+			if (db.getTransaction().isActive()) {
+				db.getTransaction().rollback();
+			}
+
+			throw e;
+		}
+	}
 
 	private boolean isPurchaseEntityMissing(Sale foundS, Seller foundCurrent) {
 		return foundS == null || foundCurrent == null;
 	}
 
 	private boolean hasInvalidPurchaseData(Sale s, Seller current) {
-		return isPurchaseEntityMissing(s, current)
-                || s.getSaleNumber() == null
-                || current.getEmail() == null;
+		return isPurchaseEntityMissing(s, current) || s.getSaleNumber() == null || current.getEmail() == null;
 	}
 
-    public boolean updateProfile(String email, String newName, String newPassword) {
-    	if (hasInvalidProfileData(email, newName, newPassword)) {
-            return false;
-        }
-    	
-        try {
-            db.getTransaction().begin();
+	public boolean updateProfile(String email, String newName, String newPassword) {
+		if (hasInvalidProfileData(email, newName, newPassword)) {
+			return false;
+		}
 
-            Seller seller = db.find(Seller.class, email);
+		try {
+			db.getTransaction().begin();
 
-            if (seller != null) {
-                updateSellerData(newName, newPassword, seller);
-                db.getTransaction().commit();
+			Seller seller = db.find(Seller.class, email);
 
-                return true;
-            }
+			if (seller != null) {
+				updateSellerData(newName, newPassword, seller);
+				db.getTransaction().commit();
 
-            db.getTransaction().commit();
+				return true;
+			}
 
-            return false;
+			db.getTransaction().commit();
 
-        } catch (Exception e) {
-            if (db.getTransaction().isActive()) {
-                db.getTransaction().rollback();
-            }
+			return false;
 
-            return false;
-        }
-    }
+		} catch (Exception e) {
+			if (db.getTransaction().isActive()) {
+				db.getTransaction().rollback();
+			}
+
+			return false;
+		}
+	}
 
 	private void updateSellerData(String newName, String newPassword, Seller seller) {
 		seller.setName(newName);
@@ -509,109 +464,94 @@ public class DataAccess {
 		return email == null || newName == null || newPassword == null;
 	}
 
-    public Seller getSellerByEmail(String email) {
-        if (email == null) {
-            return null;
-        }
+	public Seller getSellerByEmail(String email) {
+		if (email == null) {
+			return null;
+		}
 
-        db.getTransaction().begin();
+		db.getTransaction().begin();
 
-        Seller seller = db.find(Seller.class, email);
+		Seller seller = db.find(Seller.class, email);
 
-        db.getTransaction().commit();
+		db.getTransaction().commit();
 
-        return seller;
-    }
+		return seller;
+	}
 
-    public void updateMoney(String email, float amount) {
-        if (email == null) {
-            return;
-        }
+	public void updateMoney(String email, float amount) {
+		if (email == null) {
+			return;
+		}
 
-        db.getTransaction().begin();
+		db.getTransaction().begin();
 
-        Seller seller = db.find(Seller.class, email);
+		Seller seller = db.find(Seller.class, email);
 
-        if (seller != null) {
-            seller.setDirua(amount);
-            db.merge(seller);
-        }
+		if (seller != null) {
+			seller.setDirua(amount);
+			db.merge(seller);
+		}
 
-        db.getTransaction().commit();
-    }
+		db.getTransaction().commit();
+	}
 
-    public void createComplaint(String message, Seller complainant, Sale sale) {
-        if (message == null
-                || complainant == null
-                || sale == null
-                || complainant.getEmail() == null
-                || sale.getSaleNumber() == null) {
-            return;
-        }
+	public void createComplaint(String message, Seller complainant, Sale sale) {
+		if (message == null || complainant == null || sale == null || complainant.getEmail() == null
+				|| sale.getSaleNumber() == null) {
+			return;
+		}
 
-        db.getTransaction().begin();
+		db.getTransaction().begin();
 
-        Seller currentComplainant = db.find(
-                Seller.class,
-                complainant.getEmail());
+		Seller currentComplainant = db.find(Seller.class, complainant.getEmail());
 
-        Sale currentSale = db.find(
-                Sale.class,
-                sale.getSaleNumber());
+		Sale currentSale = db.find(Sale.class, sale.getSaleNumber());
 
-        Complaint complaint = new Complaint(
-                message,
-                currentComplainant,
-                currentSale);
+		Complaint complaint = new Complaint(message, currentComplainant, currentSale);
 
-        db.persist(complaint);
+		db.persist(complaint);
 
-        db.getTransaction().commit();
-    }
+		db.getTransaction().commit();
+	}
 
-    public List<Complaint> getUnmanagedComplaints() {
-        TypedQuery<Complaint> query = db.createQuery(
-                "SELECT c FROM Complaint c "
-                        + "WHERE c.managed = false "
-                        + "ORDER BY c.date DESC",
-                Complaint.class);
+	public List<Complaint> getUnmanagedComplaints() {
+		TypedQuery<Complaint> query = db.createQuery(
+				"SELECT c FROM Complaint c " + "WHERE c.managed = false " + "ORDER BY c.date DESC", Complaint.class);
 
-        return query.getResultList();
-    }
+		return query.getResultList();
+	}
 
-    public void markComplaintAsManaged(Integer complaintId) {
-        if (complaintId == null) {
-            return;
-        }
+	public void markComplaintAsManaged(Integer complaintId) {
+		if (complaintId == null) {
+			return;
+		}
 
-        db.getTransaction().begin();
+		db.getTransaction().begin();
 
-        Complaint complaint = db.find(
-                Complaint.class,
-                complaintId);
+		Complaint complaint = db.find(Complaint.class, complaintId);
 
-        if (complaint != null) {
-            complaint.setManaged(true);
-            db.merge(complaint);
-        }
+		if (complaint != null) {
+			complaint.setManaged(true);
+			db.merge(complaint);
+		}
 
-        db.getTransaction().commit();
-    }
+		db.getTransaction().commit();
+	}
 
-    public void buyBasket(String email) {
-        db.getTransaction().begin();
+	public void buyBasket(String email) {
+		db.getTransaction().begin();
 
-        Seller buyer = db.find(Seller.class, email);
-        List<Sale> basket = buyer.getBasket();
+		Seller buyer = db.find(Seller.class, email);
+		List<Sale> basket = buyer.getBasket();
 
-        for (Sale s : new ArrayList<Sale>(basket)) {
-            purchaseBasketItem(buyer, s);
-        }
+		for (Sale s : new ArrayList<Sale>(basket)) {
+			purchaseBasketItem(buyer, s);
+		}
 
-        buyer.clearBasket();
+		buyer.clearBasket();
 
-        db.getTransaction().commit();
-    }
+		db.getTransaction().commit();
+	}
 
 	private void purchaseBasketItem(Seller buyer, Sale s) {
 		Sale sale = db.find(Sale.class, s.getSaleNumber());
@@ -625,385 +565,335 @@ public class DataAccess {
 		buyer.addBought(sale);
 	}
 
-    public void addProductToBasket(String email, int saleNumber) {
-        db.getTransaction().begin();
+	public void addProductToBasket(String email, int saleNumber) {
+		db.getTransaction().begin();
 
-        try {
-            Seller buyer = db.find(Seller.class, email);
-            Sale productToAdd = db.find(Sale.class, saleNumber);
+		try {
+			Seller buyer = db.find(Seller.class, email);
+			Sale productToAdd = db.find(Sale.class, saleNumber);
 
-            if (buyer.getBasket() == null) {
-                buyer.setBasket(new ArrayList<Sale>());
-            }
+			if (buyer.getBasket() == null) {
+				buyer.setBasket(new ArrayList<Sale>());
+			}
 
-            List<Sale> currentBasket = buyer.getBasket();
+			List<Sale> currentBasket = buyer.getBasket();
 
-            if (!currentBasket.isEmpty()) {
-                Seller firstSeller = currentBasket.get(0).getSeller();
+			if (!currentBasket.isEmpty()) {
+				Seller firstSeller = currentBasket.get(0).getSeller();
 
-                if (!firstSeller.getEmail()
-                        .equals(productToAdd.getSeller().getEmail())) {
+				if (!firstSeller.getEmail().equals(productToAdd.getSeller().getEmail())) {
 
-                    db.getTransaction().rollback();
+					db.getTransaction().rollback();
 
-                    throw new RuntimeException(
-                            "Solo puedes añadir productos del mismo vendedor.");
-                }
-            }
+					throw new RuntimeException("Solo puedes añadir productos del mismo vendedor.");
+				}
+			}
 
-            buyer.addToBasket(productToAdd);
+			buyer.addToBasket(productToAdd);
 
-            db.getTransaction().commit();
+			db.getTransaction().commit();
 
-            System.out.println(
-                    "Producto guardado en BD. Tamaño cesta: "
-                            + buyer.getBasket().size());
+			System.out.println("Producto guardado en BD. Tamaño cesta: " + buyer.getBasket().size());
 
-        } catch (Exception e) {
-            if (db.getTransaction().isActive()) {
-                db.getTransaction().rollback();
-            }
+		} catch (Exception e) {
+			if (db.getTransaction().isActive()) {
+				db.getTransaction().rollback();
+			}
 
-            throw e;
-        }
-    }
+			throw e;
+		}
+	}
 
-    public void clearBasket(String email) {
-        db.getTransaction().begin();
+	public void clearBasket(String email) {
+		db.getTransaction().begin();
 
-        Seller buyer = db.find(Seller.class, email);
+		Seller buyer = db.find(Seller.class, email);
 
-        if (buyer != null && buyer.getBasket() != null) {
-            buyer.getBasket().clear();
-            db.getTransaction().commit();
-        } else {
-            db.getTransaction().rollback();
-        }
-    }
+		if (buyer != null && buyer.getBasket() != null) {
+			buyer.getBasket().clear();
+			db.getTransaction().commit();
+		} else {
+			db.getTransaction().rollback();
+		}
+	}
 
-    public void buyMultipleSales(List<Sale> sales, Seller buyer) {
-        db.getTransaction().begin();
+	public void buyMultipleSales(List<Sale> sales, Seller buyer) {
+		db.getTransaction().begin();
 
-        Seller buyerInDb = db.find(
-                Seller.class,
-                buyer.getEmail());
+		Seller buyerInDb = db.find(Seller.class, buyer.getEmail());
 
-        for (Sale s : sales) {
-            Sale saleInDb = db.find(
-                    Sale.class,
-                    s.getSaleNumber());
+		for (Sale s : sales) {
+			Sale saleInDb = db.find(Sale.class, s.getSaleNumber());
 
-            Seller vendor = saleInDb.getSeller();
+			Seller vendor = saleInDb.getSeller();
 
-            float price = saleInDb.getPrice();
+			float price = saleInDb.getPrice();
 
-            buyerInDb.setDirua(-price);
-            vendor.setDirua(price);
+			buyerInDb.setDirua(-price);
+			vendor.setDirua(price);
 
-            saleInDb.setStatus(10);
+			saleInDb.setStatus(10);
 
-            buyerInDb.addBought(saleInDb);
-        }
+			buyerInDb.addBought(saleInDb);
+		}
 
-        db.getTransaction().commit();
-    }
+		db.getTransaction().commit();
+	}
 
-    public List<Sale> getBasket(String email) {
-        Seller seller = db.find(Seller.class, email);
+	public List<Sale> getBasket(String email) {
+		Seller seller = db.find(Seller.class, email);
 
-        if (seller != null && seller.getBasket() != null) {
-            return new ArrayList<Sale>(seller.getBasket());
-        }
+		if (seller != null && seller.getBasket() != null) {
+			return new ArrayList<Sale>(seller.getBasket());
+		}
 
-        return new ArrayList<Sale>();
-    }
+		return new ArrayList<Sale>();
+	}
 
-    public void close() {
-        db.close();
-        System.out.println("DataAccess closed");
-    }
+	public void close() {
+		db.close();
+		System.out.println("DataAccess closed");
+	}
 
-    public Eskaera createEskaera(
-            String title,
-            String description,
-            String status,
-            String sellerEmail) {
-
-        try {
-            db.getTransaction().begin();
-
-            Seller seller = db.find(
-                    Seller.class,
-                    sellerEmail);
-
-            if (seller == null) {
-                db.getTransaction().commit();
-                return null;
-            }
+	public Eskaera createEskaera(String title, String description, String status, String sellerEmail) {
 
-            Eskaera eskaera = seller.addEskaera(
-                    title,
-                    description,
-                    status);
+		try {
+			db.getTransaction().begin();
 
-            db.persist(eskaera);
-            db.merge(seller);
+			Seller seller = db.find(Seller.class, sellerEmail);
 
-            db.getTransaction().commit();
+			if (seller == null) {
+				db.getTransaction().commit();
+				return null;
+			}
 
-            return eskaera;
+			Eskaera eskaera = persistAndLinkEskaera(title, description, status, seller);
 
-        } catch (NullPointerException e) {
-            if (db.getTransaction().isActive()) {
-                db.getTransaction().rollback();
-            }
+			db.getTransaction().commit();
 
-            return null;
-        }
-    }
+			return eskaera;
 
-    public List<Eskaera> getEskaerak(String search) {
-        if (search == null || search.trim().isEmpty()) {
-            return db.createQuery(
-                    "SELECT e FROM Eskaera e",
-                    Eskaera.class)
-                    .getResultList();
-        }
+		} catch (NullPointerException e) {
+			if (db.getTransaction().isActive()) {
+				db.getTransaction().rollback();
+			}
 
-        return db.createQuery(
-                "SELECT e FROM Eskaera e "
-                        + "WHERE LOWER(e.title) LIKE LOWER(:search)",
-                Eskaera.class)
-                .setParameter("search", "%" + search + "%")
-                .getResultList();
-    }
+			return null;
+		}
+	}
 
-    public Eskaera getEskaeraByID(Integer id) {
-        if (id == null) {
-            return null;
-        }
-
-        return db.find(Eskaera.class, id);
-    }
+	private Eskaera persistAndLinkEskaera(String title, String description, String status, Seller seller) {
+		Eskaera eskaera = seller.addEskaera(title, description, status);
 
-    public boolean createEskaeraOferta(
-            Integer eskID,
-            String selEmail,
-            float amount,
-            String message) {
+		db.persist(eskaera);
+		db.merge(seller);
+		return eskaera;
+	}
 
-        if (eskID == null
-                || selEmail == null
-                || message == null
-                || message.trim().isEmpty()) {
-            return false;
-        }
+	public List<Eskaera> getEskaerak(String search) {
+		if (search == null || search.trim().isEmpty()) {
+			return db.createQuery("SELECT e FROM Eskaera e", Eskaera.class).getResultList();
+		}
 
-        try {
-            db.getTransaction().begin();
+		return db.createQuery("SELECT e FROM Eskaera e " + "WHERE LOWER(e.title) LIKE LOWER(:search)", Eskaera.class)
+				.setParameter("search", "%" + search + "%").getResultList();
+	}
 
-            processEskaeraOferta(eskID, selEmail, amount, message);
+	public Eskaera getEskaeraByID(Integer id) {
+		if (id == null) {
+			return null;
+		}
 
-            db.getTransaction().commit();
+		return db.find(Eskaera.class, id);
+	}
 
-            return true;
+	public boolean createEskaeraOferta(Integer eskID, String selEmail, float amount, String message) {
 
-        } catch (Exception e) {
-            if (db.getTransaction().isActive()) {
-                db.getTransaction().rollback();
-            }
+		if (eskID == null || selEmail == null || message == null || message.trim().isEmpty()) {
+			return false;
+		}
 
-            return false;
-        }
-    }
+		try {
+			db.getTransaction().begin();
 
-    private boolean processEskaeraOferta(Integer eskID, String selEmail, float amount, String message) {
+			processEskaeraOferta(eskID, selEmail, amount, message);
 
-        Eskaera eskaera = db.find( Eskaera.class, eskID);
-        Seller seller = db.find( Seller.class, selEmail);
+			db.getTransaction().commit();
 
-        if (eskaera == null || seller == null) {
-            return false;
-        }
+			return true;
 
-        EskaeraOferta oferta = eskaera.addOferta(amount, message, seller);
-        db.persist(oferta);
-        db.merge(eskaera);
+		} catch (Exception e) {
+			if (db.getTransaction().isActive()) {
+				db.getTransaction().rollback();
+			}
 
-        return true;
-    }
+			return false;
+		}
+	}
 
-    public List<Eskaera> getMyEskaerak(Seller seller) {
-        TypedQuery<Eskaera> query = db.createQuery(
-                "SELECT e FROM Eskaera e WHERE e.seller=?1",
-                Eskaera.class);
+	private boolean processEskaeraOferta(Integer eskID, String selEmail, float amount, String message) {
 
-        query.setParameter(1, seller);
+		Eskaera eskaera = db.find(Eskaera.class, eskID);
+		Seller seller = db.find(Seller.class, selEmail);
 
-        return query.getResultList();
-    }
+		if (eskaera == null || seller == null) {
+			return false;
+		}
 
-    public List<EskaeraOferta> getOffersByEskaera(Eskaera eskaera) {
-        TypedQuery<EskaeraOferta> query = db.createQuery(
-                "SELECT eo FROM EskaeraOferta eo WHERE eo.eskaera=?1",
-                EskaeraOferta.class);
+		EskaeraOferta oferta = eskaera.addOferta(amount, message, seller);
+		db.persist(oferta);
+		db.merge(eskaera);
 
-        query.setParameter(1, eskaera);
+		return true;
+	}
 
-        return query.getResultList();
-    }
+	public List<Eskaera> getMyEskaerak(Seller seller) {
+		TypedQuery<Eskaera> query = db.createQuery("SELECT e FROM Eskaera e WHERE e.seller=?1", Eskaera.class);
 
-    public Sale createSaleFromEskaeraOfer(Integer ofertaID) {
-        try {
-            db.getTransaction().begin();
+		query.setParameter(1, seller);
 
-            EskaeraOferta eskaeraOferta = db.find(
-                    EskaeraOferta.class,
-                    ofertaID);
+		return query.getResultList();
+	}
 
-            if (eskaeraOferta == null) {
-                db.getTransaction().rollback();
-                return null;
-            }
+	public List<EskaeraOferta> getOffersByEskaera(Eskaera eskaera) {
+		TypedQuery<EskaeraOferta> query = db.createQuery("SELECT eo FROM EskaeraOferta eo WHERE eo.eskaera=?1",
+				EskaeraOferta.class);
 
-            Eskaera eskaera = eskaeraOferta.getEskaera();
-            Seller seller = eskaeraOferta.getSeller();
+		query.setParameter(1, eskaera);
 
-            if (eskaera == null || seller == null) {
-                db.getTransaction().rollback();
-                return null;
-            }
+		return query.getResultList();
+	}
 
-            Sale sale = seller.addSale(
-                    eskaera.getTitle(),
-                    eskaeraOferta.getMessage(),
-                    0,
-                    eskaeraOferta.getAmount(),
-                    new Date(),
-                    null);
+	public Sale createSaleFromEskaeraOfer(Integer ofertaID) {
+		try {
+			db.getTransaction().begin();
 
-            eskaera.setBought(true);
+			EskaeraOferta eskaeraOferta = db.find(EskaeraOferta.class, ofertaID);
 
-            db.persist(sale);
-            db.merge(seller);
-            db.merge(eskaera);
+			if (eskaeraOferta == null) {
+				db.getTransaction().rollback();
+				return null;
+			}
 
-            db.getTransaction().commit();
+			Eskaera eskaera = eskaeraOferta.getEskaera();
+			Seller seller = eskaeraOferta.getSeller();
 
-            return sale;
+			if (eskaera == null || seller == null) {
+				db.getTransaction().rollback();
+				return null;
+			}
 
-        } catch (Exception e) {
-            if (db.getTransaction().isActive()) {
-                db.getTransaction().rollback();
-            }
+			Sale sale = seller.addSale(eskaera.getTitle(), eskaeraOferta.getMessage(), 0, eskaeraOferta.getAmount(),
+					new Date(), null);
 
-            return null;
-        }
-    }
+			eskaera.setBought(true);
 
-    public void createReview(String authorEmail, int saleNumber, ReviewDetails reviewDetails) {
+			db.persist(sale);
+			db.merge(seller);
+			db.merge(eskaera);
 
-        if (reviewDetails.getStars() < 1 || reviewDetails.getStars() > 5) {
-            throw new RuntimeException(
-                    "Las estrellas deben estar entre 1 y 5.");
-        }
+			db.getTransaction().commit();
 
-        db.getTransaction().begin();
+			return sale;
 
-        try {
-            Sale sale = db.find(
-                    Sale.class,
-                    saleNumber);
+		} catch (Exception e) {
+			if (db.getTransaction().isActive()) {
+				db.getTransaction().rollback();
+			}
 
-            Seller author = db.find(
-                    Seller.class,
-                    authorEmail);
+			return null;
+		}
+	}
 
-            Seller target = sale.getSeller();
+	public void createReview(String authorEmail, int saleNumber, ReviewDetails reviewDetails) {
 
-            if (sale.getStatus() != 10) {
-                throw new RuntimeException(
-                        "Solo puedes valorar productos ya comprados.");
-            }
+		if (reviewDetails.getStars() < 1 || reviewDetails.getStars() > 5) {
+			throw new RuntimeException("Las estrellas deben estar entre 1 y 5.");
+		}
 
-            Review newReview = new Review(
-                    author,
-                    target,
-                    sale,
-                    reviewDetails.getComment(),
-                    reviewDetails.getStars());
+		db.getTransaction().begin();
 
-            target.addReview(newReview);
+		try {
+			Sale sale = db.find(Sale.class, saleNumber);
 
-            db.persist(newReview);
+			Seller author = db.find(Seller.class, authorEmail);
 
-            db.getTransaction().commit();
+			Seller target = sale.getSeller();
 
-        } catch (Exception e) {
-            if (db.getTransaction().isActive()) {
-                db.getTransaction().rollback();
-            }
+			if (sale.getStatus() != 10) {
+				throw new RuntimeException("Solo puedes valorar productos ya comprados.");
+			}
 
-            throw e;
-        }
-    }
-    
-    public List<Sale> getBoughtsBySeller(String email) {
-        Seller seller = db.find(Seller.class, email);
+			Review newReview = new Review(author, target, sale, reviewDetails.getComment(), reviewDetails.getStars());
 
-        if (seller == null) {
-            return new ArrayList<Sale>();
-        }
+			target.addReview(newReview);
 
-        return seller.getBoughts();
-    }
+			db.persist(newReview);
 
-    public List<Sale> getSalesBySeller(String email) {
-        Seller seller = db.find(Seller.class, email);
+			db.getTransaction().commit();
 
-        if (seller == null) {
-            return new ArrayList<Sale>();
-        }
+		} catch (Exception e) {
+			if (db.getTransaction().isActive()) {
+				db.getTransaction().rollback();
+			}
 
-        return seller.getSales();
-    }
+			throw e;
+		}
+	}
 
-    public List<Review> getReviewsBySeller(String email) {
-        open();
+	public List<Sale> getBoughtsBySeller(String email) {
+		Seller seller = db.find(Seller.class, email);
 
-        Seller seller = db.find(Seller.class, email);
+		if (seller == null) {
+			return new ArrayList<Sale>();
+		}
 
-        if (seller == null) {
-            return new ArrayList<Review>();
-        }
+		return seller.getBoughts();
+	}
 
-        return new ArrayList<Review>(seller.getReviewsReceived());
-    }
+	public List<Sale> getSalesBySeller(String email) {
+		Seller seller = db.find(Seller.class, email);
 
-    public String getSellerEmailBySale(Integer saleId) {
-        Sale sale = db.find(Sale.class, saleId);
+		if (seller == null) {
+			return new ArrayList<Sale>();
+		}
 
-        if (sale == null || sale.getSeller() == null) {
-            return null;
-        }
+		return seller.getSales();
+	}
 
-        return sale.getSeller().getEmail();
-    }
-    
-    
-    private Seller findSellerByCredentials(String name, String pass) {
-        TypedQuery<Seller> query = db.createQuery(
-                "SELECT s FROM Seller s WHERE s.name=?1 AND s.pass=?2",
-                Seller.class);
+	public List<Review> getReviewsBySeller(String email) {
+		open();
 
-        query.setParameter(1, name);
-        query.setParameter(2, pass);
+		Seller seller = db.find(Seller.class, email);
 
-        List<Seller> results = query.getResultList();
-        if (!results.isEmpty()) {
-            return results.get(0);
-        }
+		if (seller == null) {
+			return new ArrayList<Review>();
+		}
 
-        return null;
-    }
+		return new ArrayList<Review>(seller.getReviewsReceived());
+	}
+
+	public String getSellerEmailBySale(Integer saleId) {
+		Sale sale = db.find(Sale.class, saleId);
+
+		if (sale == null || sale.getSeller() == null) {
+			return null;
+		}
+
+		return sale.getSeller().getEmail();
+	}
+
+	private Seller findSellerByCredentials(String name, String pass) {
+		TypedQuery<Seller> query = db.createQuery("SELECT s FROM Seller s WHERE s.name=?1 AND s.pass=?2", Seller.class);
+
+		query.setParameter(1, name);
+		query.setParameter(2, pass);
+
+		List<Seller> results = query.getResultList();
+		if (!results.isEmpty()) {
+			return results.get(0);
+		}
+
+		return null;
+	}
 }
