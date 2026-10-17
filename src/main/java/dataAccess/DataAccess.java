@@ -144,7 +144,7 @@ public class DataAccess {
 
 			db.getTransaction().begin();
 
-			Seller seller = db.find(Seller.class, sellerEmail);
+			Seller seller = findSeller(sellerEmail);
 
 			if (seller.doesSaleExist(parameterObject.getTitle())) {
 				db.getTransaction().commit();
@@ -305,7 +305,7 @@ public class DataAccess {
 			return new Emaitza(false, "", null, null);
 		}
 
-		Seller seller = db.find(Seller.class, mail);
+		Seller seller = findSeller(mail);
 		Emaitza emaitza = new Emaitza(false, "", null, null);
 
 		if (seller != null) {
@@ -435,7 +435,7 @@ public class DataAccess {
 		try {
 			db.getTransaction().begin();
 
-			Seller seller = db.find(Seller.class, email);
+			Seller seller = findSeller(email);
 
 			if (seller != null) {
 				updateSellerData(newName, newPassword, seller);
@@ -475,7 +475,7 @@ public class DataAccess {
 
 		db.getTransaction().begin();
 
-		Seller seller = db.find(Seller.class, email);
+		Seller seller = findSeller(email);
 
 		db.getTransaction().commit();
 
@@ -489,7 +489,7 @@ public class DataAccess {
 
 		db.getTransaction().begin();
 
-		Seller seller = db.find(Seller.class, email);
+		Seller seller = findSeller(email);
 
 		if (seller != null) {
 			seller.setDirua(amount);
@@ -545,7 +545,7 @@ public class DataAccess {
 	public void buyBasket(String email) {
 		db.getTransaction().begin();
 
-		Seller buyer = db.find(Seller.class, email);
+		Seller buyer = findSeller(email);
 		List<Sale> basket = buyer.getBasket();
 
 		for (Sale s : new ArrayList<Sale>(basket)) {
@@ -573,7 +573,7 @@ public class DataAccess {
 		db.getTransaction().begin();
 
 		try {
-			Seller buyer = db.find(Seller.class, email);
+			Seller buyer = findSeller(email);
 			Sale productToAdd = db.find(Sale.class, saleNumber);
 
 			if (buyer.getBasket() == null) {
@@ -611,7 +611,7 @@ public class DataAccess {
 	public void clearBasket(String email) {
 		db.getTransaction().begin();
 
-		Seller buyer = db.find(Seller.class, email);
+		Seller buyer = findSeller(email);
 
 		if (buyer != null && buyer.getBasket() != null) {
 			buyer.getBasket().clear();
@@ -645,7 +645,7 @@ public class DataAccess {
 	}
 
 	public List<Sale> getBasket(String email) {
-		Seller seller = db.find(Seller.class, email);
+		Seller seller = findSeller(email);
 
 		if (seller != null && seller.getBasket() != null) {
 			return new ArrayList<Sale>(seller.getBasket());
@@ -664,7 +664,7 @@ public class DataAccess {
 		try {
 			db.getTransaction().begin();
 
-			Seller seller = db.find(Seller.class, sellerEmail);
+			Seller seller = findSeller(sellerEmail);
 
 			if (seller == null) {
 				db.getTransaction().commit();
@@ -738,7 +738,7 @@ public class DataAccess {
 	private boolean processEskaeraOferta(Integer eskID, String selEmail, float amount, String message) {
 
 		Eskaera eskaera = db.find(Eskaera.class, eskID);
-		Seller seller = db.find(Seller.class, selEmail);
+		Seller seller = findSeller(selEmail);
 
 		if (eskaera == null || seller == null) {
 			return false;
@@ -820,7 +820,7 @@ public class DataAccess {
 		try {
 			Sale sale = db.find(Sale.class, saleNumber);
 
-			Seller author = db.find(Seller.class, authorEmail);
+			Seller author = findSeller(authorEmail);
 
 			Seller target = sale.getSeller();
 
@@ -846,7 +846,7 @@ public class DataAccess {
 	}
 
 	public List<Sale> getBoughtsBySeller(String email) {
-		Seller seller = db.find(Seller.class, email);
+		Seller seller = findSeller(email);
 
 		if (seller == null) {
 			return new ArrayList<Sale>();
@@ -855,8 +855,12 @@ public class DataAccess {
 		return seller.getBoughts();
 	}
 
+	private Seller findSeller(String email) {
+		return db.find(Seller.class, email);
+	}
+
 	public List<Sale> getSalesBySeller(String email) {
-		Seller seller = db.find(Seller.class, email);
+		Seller seller = findSeller(email);
 
 		if (seller == null) {
 			return new ArrayList<Sale>();
@@ -868,7 +872,7 @@ public class DataAccess {
 	public List<Review> getReviewsBySeller(String email) {
 		open();
 
-		Seller seller = db.find(Seller.class, email);
+		Seller seller = findSeller(email);
 
 		if (seller == null) {
 			return new ArrayList<Review>();
