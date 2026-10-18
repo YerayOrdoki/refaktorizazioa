@@ -703,44 +703,53 @@ public class DataAccess {
 		return db.find(Eskaera.class, id);
 	}
 
-	public boolean createEskaeraOferta(OfertaData parameterObject) {
+	public boolean createEskaeraOferta(OfertaData ofertaData) { 
+	    if (ofertaData == null 
+	            || ofertaData.getEskID() == null 
+	            || ofertaData.getSelEmail() == null 
+	            || ofertaData.getMessage() == null 
+	            || ofertaData.getMessage().trim().isEmpty()) { 
+	        return false; 
+	    } 
 
-		if (parameterObject.eskID == null || parameterObject.selEmail == null || parameterObject.message == null || parameterObject.message.trim().isEmpty()) {
-			return false;
-		}
+	    try { 
+	        db.getTransaction().begin(); 
 
-		try {
-			db.getTransaction().begin();
+	        if (!processEskaeraOferta(ofertaData)) { 
+	            db.getTransaction().rollback(); 
+	            return false; 
+	        } 
 
-			processEskaeraOferta(parameterObject.eskID, parameterObject.selEmail, parameterObject.amount, parameterObject.message);
+	        db.getTransaction().commit(); 
 
-			db.getTransaction().commit();
+	        return true; 
 
-			return true;
+	    } catch (Exception e) { 
+	        if (db.getTransaction().isActive()) { 
+	            db.getTransaction().rollback(); 
+	        } 
 
-		} catch (Exception e) {
-			if (db.getTransaction().isActive()) {
-				db.getTransaction().rollback();
-			}
+	        return false; 
+	    } 
+	} 
 
-			return false;
-		}
-	}
+	private boolean processEskaeraOferta(OfertaData ofertaData) { 
+	    Eskaera eskaera = db.find(Eskaera.class, ofertaData.getEskID()); 
+	    Seller seller = db.find(Seller.class, ofertaData.getSelEmail()); 
 
-	private boolean processEskaeraOferta(Integer eskID, String selEmail, float amount, String message) {
+	    if (eskaera == null || seller == null) { 
+	        return false; 
+	    } 
 
-		Eskaera eskaera = db.find(Eskaera.class, eskID);
-		Seller seller = db.find(Seller.class, selEmail);
+	    EskaeraOferta oferta = eskaera.addOferta( 
+	            ofertaData.getAmount(), 
+	            ofertaData.getMessage(), 
+	            seller); 
 
-		if (eskaera == null || seller == null) {
-			return false;
-		}
+	    db.persist(oferta); 
+	    db.merge(eskaera); 
 
-		EskaeraOferta oferta = eskaera.addOferta(amount, message, seller);
-		db.persist(oferta);
-		db.merge(eskaera);
-
-		return true;
+	    return true; 
 	}
 
 	public List<Eskaera> getMyEskaerak(Seller seller) {
